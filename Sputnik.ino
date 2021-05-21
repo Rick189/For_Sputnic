@@ -8,9 +8,7 @@
 
 //Ввод данных
 //Акселеромерт
-#define T_OUT 20
 MPU6050 mpu;
-unsigned long int t_next;
 //Термопара на 500
 int thermoDO = 4;
 int thermoCS = 5;
