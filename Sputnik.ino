@@ -32,6 +32,8 @@ void setup() {
    thermocouple = new MAX6675_Thermocouple(thermoDO, thermoCS, thermoCLK);
    //Объявляем пины термопары 2
    thermocouple_1 = new MAX6675_Thermocouple(thermoDO_1, thermoCS_1, thermoCLK_1);
+   // получаем начальное давление для правильных вычислений 0_0
+   referencePressure = ms5611.readPressure();
 }
 
 void loop() {
