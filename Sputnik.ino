@@ -5,8 +5,12 @@
 #include "MAX6675_Thermocouple.h"
 #include "I2Cdev.h"
 #include "MPU6050.h"
+#include <RCSwitch.h>
 
 //Ввод данных
+int loops = 0;
+//Радио модуль
+RCSwitch mySwitch = RCSwitch();
 //Акселеромерт
 MPU6050 mpu;
 //Термопара на 500
@@ -34,29 +38,12 @@ void setup() {
    thermocouple_1 = new MAX6675_Thermocouple(thermoDO_1, thermoCS_1, thermoCLK_1);
    // получаем начальное давление для правильных вычислений 0_0
    referencePressure = ms5611.readPressure();
+   //Радио модуль
+   mySwitch.enableTransmit(1);
+   mySwitch.enableReceive(0);
 }
 
 void loop() {
-  //digitalWrite(10, HIGH); // зажигаем светодиод
-  //delay(5000); // ждем 5 секунды
-  //digitalWrite(10, LOW); // выключаем светодиод
-  //delay(2000); // ждем 2 секунды
-
-  //digitalWrite(11, HIGH); // зажигаем светодиод
-  //delay(5000); // ждем 5 секунды
-  //digitalWrite(11, LOW); // выключаем светодиод  
-  //delay(2000); // ждем 2 секунды
-
-   //digitalWrite(12, HIGH); // зажигаем светодиод
-   //delay(5000); // ждем 5 секунды
-   //digitalWrite(12, LOW); // выключаем светодиод
-   //delay(2000); // ждем 2 секунды
-
-   //digitalWrite(13, HIGH); // зажигаем светодиод
-   //delay(5000); // ждем 5 секунды
-   //digitalWrite(13, LOW); // выключаем светодиод
-   //delay(2000); // ждем 2 секунды
-
     // Получение предворительных данных
   uint32_t rawTemp = ms5611.readRawTemperature();
   uint32_t rawPressure = ms5611.readRawPressure();
@@ -70,19 +57,39 @@ void loop() {
   const double celsius_1 = thermocouple_1->readCelsius();
   
   //Включаем 2 реле
-  digitalWrite(10, HIGH);
-  digitalWrite(12, HIGH);
+  int value = mySwitch.getReceivedValue();
+  if (value == "St" or loops == 100){
+    digitalWrite(10, HIGH);
+    digitalWrite(12, HIGH);
+  
   //Если 1 реле не работает, влючаем второе
   if (celsius < 500){
+    digitalWrite(10, HIGH);
     if (digitalRead(10) == LOW){
        digitalWrite(11, HIGH);
-      }
+      }else{
+        digitalWrite(11, LOW);
+        }
     }
   if (celsius_1 < 1000){
+    digitalWrite(12, HIGH);
     if (digitalRead(12) == LOW){
        digitalWrite(13, HIGH);
-      }
+      }else{
+        digitalWrite(13, LOW);
+        }
     }  
+    loops = 99
+  }
+
+  mySwitch.send("; R1:", digitalRead(10));
+  mySwitch.send("; R2:", digitalRead(11));
+  mySwitch.send("; R3:", digitalRead(12));
+  mySwitch.send("; R4", digitalRead(13));
+  mySwitch.send("; C:", celsius);
+  mySwitch.send("; C_1:", celsius_1);
+    
+  //Сохранение на SD курту
   //Получение данных с акселерометра
   Vector rawAccel = mpu.readRawAccel();
   Vector rawGyro = mpu.readRawGyro();
@@ -132,4 +139,6 @@ void loop() {
     dataFile.print(absoluteAltitude);
     dataFile.close();
   }
+  loops = loops + 1;
+  delay(5000);
 }
