@@ -32,6 +32,9 @@ MPU6050 mpu;
 MS5611 ms5611;
 double referencePressure;
 
+boolean enableGPS = false;
+boolean enableLogger = false;
+boolean enableRadio = false;
 
 void setup() {
    //pinMode(10, OUTPUT); 
@@ -45,12 +48,31 @@ void setup() {
    Serial.begin(9600);
    Serial.println("[Kosmodesantnik] Program start");
    Serial.println("==============================");
+   // ms5611
    if(!ms5611.begin()) Serial.println("[Kosmodesantnik] MS5611 error!");
+   // mpu
    Wire.begin();
    mpu.initialize();
    if(!mpu.testConnection()) Serial.println("[Kosmodesantnik] MPU6050 error!");
    // получаем начальное давление для правильных вычислений 0_0
    referencePressure = ms5611.readPressure();
+   // setup logger
+   if(enableLogger) {
+      Serial2.begin(9600);
+      Serial.println("Logger setup complete!");
+   }
+   // setup radio
+   if(enableRadio) {
+      pinMode(8, OUTPUT);
+      pinMode(9, OUTPUT);
+      Serial1.begin(9600);
+      Serial.println("Radio setup complete!");
+   }
+   // setup gps
+   if(enableGPS) {
+      Serial3.begin(9600);
+      Serial.println("GPS setup complete!");
+   }
    Serial.println("[Kosmodesantnik] Setup complete");
 }
 
@@ -107,7 +129,21 @@ void loop() {
   Serial.print(gyf);
   Serial.print(", ");
   Serial.println(gzf);
- 
+   
+  if(enableLogger) {
+     Serial2.print("[Kosmodesantnik] T+"); Serial2.print(millis() / 1000); Serial2.println(" s,");
+     Serial.println("Write data to logger...");
+  }
+   
+  if(enableGPS) {
+     
+  }
+   
+  if(enableRadio) {
+     Serial1.print("[Kosmodesantnik] Packet: T+"); Serial1.print(millis() / 1000); Serial1.println(" s,");
+     Serial.println("Transmit packet by radio...");
+  }
+   
   delay(1000); 
   //const double celsius = thermocouple->readCelsius();
   //const double celsius_1 = thermocouple_1->readCelsius();
