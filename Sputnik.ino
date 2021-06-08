@@ -20,16 +20,11 @@
 //RCSwitch mySwitch = RCSwitch();
 //Акселерометр
 MPU6050 mpu;
-//Термопара на 500
-//int thermoDO = 4;
-//int thermoCS = 5;
-//int thermoCLK = 6;
-//MAX6675_Thermocouple* thermocouple = NULL;
-//Термопара 1000
-//int thermoDO_1 = 7;
-//int thermoCS_1 = 8;
-//int thermoCLK_1 = 9;
-//MAX6675_Thermocouple* thermocouple_1 = NULL;
+//Термопара на 1000
+uint8_t thermoDO = 4;
+uint8_t thermoCS = 5;
+uint8_t thermoCLK = 6;
+MAX6675_Thermocouple* thermocouple = NULL;
 MS5611 ms5611;
 double referencePressure;
 TinyGPSPlus gps;
@@ -44,10 +39,8 @@ void setup() {
    //pinMode(11, OUTPUT);
    //pinMode(12, OUTPUT);
    //pinMode(13, OUTPUT);
-   //Объявляем пины термопары 1
-   //thermocouple = new MAX6675_Thermocouple(thermoDO, thermoCS, thermoCLK);
-   //Объявляем пины термопары 2
-   //thermocouple_1 = new MAX6675_Thermocouple(thermoDO_1, thermoCS_1, thermoCLK_1);
+   //Объявляем пины термопары
+   thermocouple = new MAX6675_Thermocouple(thermoDO, thermoCS, thermoCLK);
    Serial.begin(9600);
    Serial.println("[Kosmodesantnik] Program start");
    Serial.println("==============================");
@@ -108,8 +101,11 @@ void loop() {
   // Подсчет и получение
   float absoluteAltitude = ms5611.getAltitude(realPressure);
   float relativeAltitude = ms5611.getAltitude(realPressure, referencePressure);
-   
-  Serial.print("[Kosmodesantnik] rawTemp: ");
+  float celsius = thermocouple->readCelsius();
+  
+  Serial.print("[Kosmodesantnik] celsius: ");
+  Serial.print(celsius); Serial.print("°");
+  Serial.print(", rawTemp: ");
   Serial.print(rawTemp);
   Serial.print(", rawPressure: ");
   Serial.print(rawPressure);
@@ -157,7 +153,7 @@ void loop() {
   }
    
   if(enableGPS) {
-     /*Serial.print("[Kosmodesantnik] GPS: Sats, HDOP, lat, lon, age, date, altitude[m], course[°], speed[km/h]: ");
+     Serial.print("[Kosmodesantnik] GPS: Sats, HDOP, lat, lon, age, date, altitude[m], course[°], speed[km/h]: ");
      Serial.print(gps.satellites.value()); Serial.print(", ");
      Serial.print(gps.hdop.hdop()); Serial.print(", ");
      Serial.print(gps.location.lat(), 5); Serial.print(", ");
@@ -177,34 +173,13 @@ void loop() {
        }
        digitalWrite(37, gpsLedState ? HIGH : LOW);
        gpsLedState = !gpsLedState;
-     } while(millis() - startTime < gpsTimeout);*/
+     } while(millis() - startTime < gpsTimeout);
   }
    
   if(enableRadio) {
-     // transmit to radio
      Serial1.print("[Kosmodesantnik] Packet: T+"); Serial1.print(millis() / 1000); Serial1.print(" s,");
-     Serial1.print(gps.satellites.value()); Serial1.print(", ");
-     Serial1.print(gps.hdop.hdop()); Serial1.print(", ");
-     Serial1.print(gps.location.lat(), 5); Serial1.print(", ");
-     Serial1.print(gps.location.lng(), 5); Serial1.print(", ");
-     Serial1.print(gps.location.age()); Serial1.print(", [");
-     Serial1.print(gps.date.day()); Serial1.print(","); Serial1.print(gps.date.month()); Serial1.print(","); Serial1.print(gps.date.year()); Serial1.print("], [");
-     Serial1.print(gps.time.hour()); Serial1.print(":"); Serial1.print(gps.time.minute()); Serial1.print(":"); Serial1.print(gps.time.second()); Serial1.print("], ");
-     Serial1.print(gps.altitude.meters()); Serial1.print(", ");
-     Serial1.print(gps.course.deg()); Serial1.print(", ");
-     Serial1.println(gps.speed.kmph());
      Serial.println("Transmit packet by radio...");
      digitalWrite(35, HIGH);
-     
-     long gpsTimeout = 1000;
-     unsigned long startTime = millis();
-     do {
-       while(Serial3.available()) {
-         gps.encode(Serial3.read());
-       }
-       digitalWrite(37, gpsLedState ? HIGH : LOW);
-       gpsLedState = !gpsLedState;
-     } while(millis() - startTime < gpsTimeout);
   }
   
   // led animation конец цикла
