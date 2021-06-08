@@ -11,6 +11,7 @@
 #include "MAX6675_Thermocouple.h"
 #include "I2Cdev.h"
 #include "MPU6050.h"
+#include <TinyGPS++.h>
 //#include <RCSwitch.h>
 
 //Ввод данных
@@ -31,6 +32,8 @@ MPU6050 mpu;
 //MAX6675_Thermocouple* thermocouple_1 = NULL;
 MS5611 ms5611;
 double referencePressure;
+TinyGPSPlus gps;
+boolean gpsLedState = false;
 
 boolean enableGPS = false;
 boolean enableLogger = false;
@@ -48,6 +51,10 @@ void setup() {
    Serial.begin(9600);
    Serial.println("[Kosmodesantnik] Program start");
    Serial.println("==============================");
+   // led animation setup
+   for(uint8_t i = 0; i < 3; i++) {
+      pinMode(31 + i, OUTPUT);
+   }
    // ms5611
    if(!ms5611.begin()) Serial.println("[Kosmodesantnik] MS5611 error!");
    // mpu
@@ -62,6 +69,8 @@ void setup() {
       Serial.println("Logger setup complete!");
    }
    // setup radio
+   // radio led
+   pinMode(35, OUTPUT);
    if(enableRadio) {
       pinMode(8, OUTPUT);
       pinMode(9, OUTPUT);
@@ -69,6 +78,8 @@ void setup() {
       Serial.println("Radio setup complete!");
    }
    // setup gps
+   // gps led
+   pinMode(37, OUTPUT);
    if(enableGPS) {
       Serial3.begin(9600);
       Serial.println("GPS setup complete!");
@@ -77,6 +88,16 @@ void setup() {
 }
 
 void loop() {
+  // led animation старт цикла
+  for(uint8_t i = 0; i < 3; i++) {
+     digitalWrite(31 + i, HIGH);
+     delay(125);
+  }
+  // очищаем светодиод радио
+  if(enableRadio) {
+     digitalWrite(35, LOW);
+  }
+   
   Serial.println("[Kosmodesantnik] Read barometer sensor [temperature, pressure, absolute/relative altitude]");
   // Получение предворительных данных
   uint32_t rawTemp = ms5611.readRawTemperature();
@@ -136,14 +157,41 @@ void loop() {
   }
    
   if(enableGPS) {
-     
+     Serial.print("[Kosmodesantnik] GPS: Sats, HDOP, lat, lon, age, date, altitude[m], course[°], speed[km/h]: ");
+     Serial.print(gps.satellites.value()); Serial.print(", ");
+     Serial.print(gps.hdop.hdop()); Serial.print(", ");
+     Serial.print(gps.location.lat(), 5); Serial.print(", ");
+     Serial.print(gps.location.lng(), 5); Serial.print(", ");
+     Serial.print(gps.location.age()); Serial.print(", [");
+     Serial.print(gps.date.day()); Serial.print(","); Serial.print(gps.date.month()); Serial.print(","); Serial.print(gps.date.year()); Serial.print("], [");
+     Serial.print(gps.time.hour()); Serial.print(":"); Serial.print(gps.time.minute()); Serial.print(":"); Serial.print(gps.time.second()); Serial.print("], ");
+     Serial.print(gps.altitude.meters()); Serial.print(", ");
+     Serial.print(gps.course.deg()); Serial.print(", ");
+     Serial.println(gps.speed.kmph());
+    
+     long gpsTimeout = 1000;
+     unsigned long startTime = millis();
+     do {
+       while(Serial3.available()) {
+         gps.encode(Serial3.read());
+       }
+       digitalWrite(37, gpsLedState ? HIGH : LOW);
+       gpsLedState = !gpsLedState;
+     } while(millis() - startTime < gpsTimeout);
   }
    
   if(enableRadio) {
      Serial1.print("[Kosmodesantnik] Packet: T+"); Serial1.print(millis() / 1000); Serial1.println(" s,");
      Serial.println("Transmit packet by radio...");
+     digitalWrite(35, HIGH);
   }
-   
+  
+  // led animation конец цикла
+  for(uint8_t i = 0; i < 3; i++) {
+     digitalWrite(31 + i, LOW);
+     delay(125);
+  }
+  
   delay(1000); 
   //const double celsius = thermocouple->readCelsius();
   //const double celsius_1 = thermocouple_1->readCelsius();
