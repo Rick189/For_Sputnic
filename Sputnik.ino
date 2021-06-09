@@ -178,6 +178,7 @@ void loop() {
   }
    
   if(enableRadio && loops % 20 == 0) {
+     // кодировку пакета
      Serial1.print("[Kosmodesantnik] Packet: T+"); Serial1.print(millis() / 1000); Serial1.print(" s,");
      Serial.println("Transmit packet by radio...");
      digitalWrite(35, HIGH);
