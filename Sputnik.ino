@@ -29,6 +29,7 @@ MS5611 ms5611;
 double referencePressure;
 TinyGPSPlus gps;
 boolean gpsLedState = false;
+long loops = 0;
 
 boolean enableGPS = false;
 boolean enableLogger = false;
@@ -176,7 +177,7 @@ void loop() {
      } while(millis() - startTime < gpsTimeout);
   }
    
-  if(enableRadio) {
+  if(enableRadio && loops % 20 == 0) {
      Serial1.print("[Kosmodesantnik] Packet: T+"); Serial1.print(millis() / 1000); Serial1.print(" s,");
      Serial.println("Transmit packet by radio...");
      digitalWrite(35, HIGH);
@@ -188,7 +189,8 @@ void loop() {
      delay(125);
   }
   
-  delay(1000); 
+  loops += 1;
+  delay(1000);
   //const double celsius = thermocouple->readCelsius();
   //const double celsius_1 = thermocouple_1->readCelsius();
   
