@@ -107,9 +107,9 @@ void loop() {
   // получение температуры с термопары
   float celsius = thermocouple->readCelsius();
   
-  //
-  if(floor(relativeAltitude) > 50 && !startDetected) startDetected = true;
-  if(floor(relativeAltitude) < 50 && startDetected) {
+  // порог - 50 м
+  if(floor(floor(relativeAltitude) / 10) > 50 / 10 && !startDetected) startDetected = true;
+  if(floor(floor(relativeAltitude) / 10) < 50 / 10 && startDetected) {
      // landing detected - disabling radio
      Serial1.end();
   }
