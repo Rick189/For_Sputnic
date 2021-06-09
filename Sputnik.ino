@@ -128,7 +128,7 @@ void loop() {
   Serial.print(absoluteAltitude);
   Serial.print(", relativeAltitude: ");
   Serial.println(relativeAltitude);
-   
+  
   Serial.println("[Kosmodesantnik] Read IMU sensor [accelerometer x/y/z, gyroscope x/y/z]");
   
   // чтение сырых данных акселерометра/гироскопа
