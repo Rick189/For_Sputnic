@@ -83,12 +83,7 @@ void setup() {
    Serial.println("[Kosmodesantnik] Setup complete");
 }
 
-void loop() {
-  if(alt < 50.0 && alt - prev >= 2.0) {
-     Serial1.end();
-     per += 1;
-  }
-   
+void loop() {   
   // led animation старт цикла
   for(uint8_t i = 0; i < 3; i++) {
      digitalWrite(31 + i, HIGH);
@@ -113,8 +108,8 @@ void loop() {
   float celsius = thermocouple->readCelsius();
   
   //
-  if(relativeAltitude > 50.0 && !startDetected) startDetected = true;
-  if(relativeAltitude < 50.0 && startDetected && averageDeltaAltPerMinute >= 2.0) {
+  if(floor(relativeAltitude) > 50 && !startDetected) startDetected = true;
+  if(floor(relativeAltitude) < 50 && startDetected) {
      // landing detected - disabling radio
      Serial1.end();
   }
