@@ -21,9 +21,9 @@
 //Акселерометр
 MPU6050 mpu;
 //Термопара на 1000
-uint8_t thermoDO = 41;
-uint8_t thermoCS = 45;
-uint8_t thermoCLK = 49;
+uint8_t thermoDO = 4;
+uint8_t thermoCS = 5;
+uint8_t thermoCLK = 6;
 MAX6675_Thermocouple* thermocouple = NULL;
 MS5611 ms5611;
 double referencePressure;
