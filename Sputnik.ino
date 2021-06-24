@@ -29,7 +29,6 @@ MS5611 ms5611;
 double referencePressure;
 TinyGPSPlus gps;
 boolean gpsLedState = false;
-String Trans = LOW;
 
 long loops = 0;
 boolean startDetected = false;
@@ -44,10 +43,7 @@ void setup() {
    //pinMode(12, OUTPUT);
    //pinMode(13, OUTPUT);
    // Объявляем пины транзисторов
-   pinMode(58, OUTPUT);
-   pinMode(62, OUTPUT);
    //Запускаем 1 транзистор
-   digitalWrite(58, HIGH);
    //Объявляем пины термопары
    thermocouple = new MAX6675_Thermocouple(thermoDO, thermoCS, thermoCLK);
    Serial.begin(9600);
@@ -90,8 +86,6 @@ void setup() {
 }
 
 void loop() {   
-  //Переменно запускаем 2 транзистор
-  digitalWrite(62, Trans);
   // led animation старт цикла
   for(uint8_t i = 0; i < 3; i++) {
      digitalWrite(31 + i, HIGH);
@@ -211,7 +205,6 @@ void loop() {
   }
   
   loops += 1;
-  Trans = HIGH;
   delay(1000);
   //const double celsius = thermocouple->readCelsius();
   //const double celsius_1 = thermocouple_1->readCelsius();
