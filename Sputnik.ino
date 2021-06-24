@@ -21,14 +21,15 @@
 //Акселерометр
 MPU6050 mpu;
 //Термопара на 1000
-uint8_t thermoDO = 4;
-uint8_t thermoCS = 5;
-uint8_t thermoCLK = 6;
+uint8_t thermoDO = 41;
+uint8_t thermoCS = 45;
+uint8_t thermoCLK = 49;
 MAX6675_Thermocouple* thermocouple = NULL;
 MS5611 ms5611;
 double referencePressure;
 TinyGPSPlus gps;
 boolean gpsLedState = false;
+String Trans = LOW;
 
 long loops = 0;
 boolean startDetected = false;
@@ -42,6 +43,11 @@ void setup() {
    //pinMode(11, OUTPUT);
    //pinMode(12, OUTPUT);
    //pinMode(13, OUTPUT);
+   // Объявляем пины транзисторов
+   pinMode(58, OUTPUT);
+   pinMode(62, OUTPUT);
+   //Запускаем 1 транзистор
+   digitalWrite(58, HIGH);
    //Объявляем пины термопары
    thermocouple = new MAX6675_Thermocouple(thermoDO, thermoCS, thermoCLK);
    Serial.begin(9600);
@@ -84,6 +90,8 @@ void setup() {
 }
 
 void loop() {   
+  //Переменно запускаем 2 транзистор
+  digitalWrite(62, Trans);
   // led animation старт цикла
   for(uint8_t i = 0; i < 3; i++) {
      digitalWrite(31 + i, HIGH);
@@ -93,7 +101,8 @@ void loop() {
   if(enableRadio) {
      digitalWrite(35, LOW);
   }
-   
+  //Работа транзисторов и 
+
   Serial.println("[Kosmodesantnik] Read barometer sensor [temperature, pressure, absolute/relative altitude]");
   // Получение предворительных данных
   uint32_t rawTemp = ms5611.readRawTemperature();
@@ -202,6 +211,7 @@ void loop() {
   }
   
   loops += 1;
+  Trans = HIGH;
   delay(1000);
   //const double celsius = thermocouple->readCelsius();
   //const double celsius_1 = thermocouple_1->readCelsius();
