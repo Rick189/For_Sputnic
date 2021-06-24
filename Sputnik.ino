@@ -21,9 +21,9 @@
 //Акселерометр
 MPU6050 mpu;
 //Термопара на 1000
-uint8_t thermoDO = 4;
-uint8_t thermoCS = 5;
-uint8_t thermoCLK = 6;
+uint8_t thermoDO = 45;
+uint8_t thermoCS = 49;
+uint8_t thermoCLK = 53;
 MAX6675_Thermocouple* thermocouple = NULL;
 MS5611 ms5611;
 double referencePressure;
@@ -33,9 +33,9 @@ boolean gpsLedState = false;
 long loops = 0;
 boolean startDetected = false;
 
-boolean enableGPS = false;
-boolean enableLogger = false;
-boolean enableRadio = false;
+boolean enableGPS = true;
+boolean enableLogger = true;
+boolean enableRadio = true;
 
 void setup() {
    //pinMode(10, OUTPUT); 
